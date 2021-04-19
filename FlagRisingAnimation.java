@@ -25,9 +25,7 @@ public class FlagRisingAnimation extends Application {
 			@Override
 			public void run() {
 				try {
-				
-					Boolean running = true;
-					while (running) {
+					while (true) {
 						while (imageView.getY() > 0) {
 							imageView.setY(imageView.getY()-1);
 							Thread.sleep(20);
