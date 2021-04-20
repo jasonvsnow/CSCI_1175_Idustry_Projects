@@ -1,35 +1,34 @@
 package exercise33_09;
 
-
-
 import java.io.*;
 import java.net.*;
-import java.util.*;
-import javafx.event.*;
-import javafx.scene.input.*;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.application.Application;
+import static javafx.application.Application.launch;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 
 /*
  * Author: Jason Snow
  * Date: 04/20/2021
  * 
- * This program was edited to act as a server between two programs that act enables two users 
+ * This program was edited to act as a client between two programs that act enables two users 
  * to chat.
  */
-
-public class Exercise33_09Server extends Application {
+public class Exercise33_09Client extends Application {
   private TextArea taServer = new TextArea();
   private TextArea taClient = new TextArea();
-  private DataInputStream fromClient = null;
-  private DataOutputStream toClient = null;
+  private DataInputStream fromServer = null;
+  private DataOutputStream toServer = null;
  
   @Override // Override the start method in the Application class
   public void start(Stage primaryStage) {
@@ -49,27 +48,25 @@ public class Exercise33_09Server extends Application {
 
     // Create a scene and place it in the stage
     Scene scene = new Scene(vBox, 200, 200);
-    primaryStage.setTitle("Exercise31_09Server"); // Set the stage title
+    primaryStage.setTitle("Exercise31_09Client"); // Set the stage title
     primaryStage.setScene(scene); // Place the scene in the stage
     primaryStage.show(); // Display the stage
 
     // To complete later
     new Thread(() -> {
     	try {
-    		ServerSocket serverSocket = new ServerSocket(8000);
-    		 
-    		Socket socket = serverSocket.accept();
-    		 
-        	fromClient = new DataInputStream(socket.getInputStream());
+    		Socket socket = new Socket("localhost", 8000);
+    		
+        	fromServer = new DataInputStream(socket.getInputStream());
         	
-        	toClient = new DataOutputStream(socket.getOutputStream());
+        	toServer = new DataOutputStream(socket.getOutputStream());
         	
 	    	while (true) {
-				//receive messages from client
-				String message = fromClient.readUTF();
+				//receive messages from server
+				String message = fromServer.readUTF();
 				
 				Platform.runLater(() -> {
-					taServer.appendText("C: " + message + '\n');
+					taServer.appendText("S: " + message + '\n');
 				});
 	    	}
     	}
@@ -82,11 +79,11 @@ public class Exercise33_09Server extends Application {
     	public void handle(KeyEvent e){
     		if (e.getCode() == KeyCode.ENTER) {
     			try {
-     				String message = taClient.getText().trim();
-    				toClient.writeUTF(message);
-    				toClient.flush();
-    				taClient.setText("");	
-    				taServer.appendText("S: " + message + "\n");
+    				String message = taClient.getText().trim();
+					toServer.writeUTF(message);
+					toServer.flush();
+					taClient.setText("");	
+					taServer.appendText("C: " + message + "\n");
     			}
     			catch (IOException ex){
     				
@@ -94,11 +91,10 @@ public class Exercise33_09Server extends Application {
     		}
     	}
     });
-    	
+    
    
-
-
   }
+
   /**
    * The main method is only needed for the IDE with limited
    * JavaFX support. Not needed for running from the command line.
